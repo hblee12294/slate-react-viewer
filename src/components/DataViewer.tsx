@@ -6,14 +6,10 @@ import { githubLightTheme } from "@uiw/react-json-view/githubLight";
 
 interface DataViewerProps {
   value: Descendant[];
+  isDarkMode: boolean;
 }
 
-const DataViewer: React.FC<DataViewerProps> = ({ value }) => {
-  // Determine if dark mode is active (simple check, could be improved with context or hook)
-  const isDarkMode =
-    window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-
+const DataViewer: React.FC<DataViewerProps> = ({ value, isDarkMode }) => {
   return (
     <div className="data-viewer">
       <JsonView

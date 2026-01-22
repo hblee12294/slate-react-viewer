@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Descendant } from "slate";
+import { MdDarkMode, MdLightMode } from "react-icons/md";
 import "./index.css";
 import Editor from "./components/Editor";
 import DataViewer from "./components/DataViewer";
@@ -30,14 +31,43 @@ const INITIAL_VALUE: Descendant[] = [
 
 function App() {
   const [value, setValue] = useState<Descendant[]>(INITIAL_VALUE);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Check localStorage first
+    const stored = localStorage.getItem("theme");
+    if (stored) return stored === "dark";
+    // Fallback to system preference
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  });
+
+  useEffect(() => {
+    // Update data-theme attribute on root
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.setAttribute("data-theme", "dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      root.removeAttribute("data-theme");
+      localStorage.setItem("theme", "light");
+    }
+  }, [isDarkMode]);
+
+  const toggleTheme = () => setIsDarkMode((prev) => !prev);
 
   return (
     <div className="app-container">
+      <button
+        className="theme-toggle-btn"
+        onClick={toggleTheme}
+        aria-label={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+      >
+        {isDarkMode ? <MdLightMode /> : <MdDarkMode />}
+      </button>
+
       <div className="pane pane-left">
         <Editor value={value} onChange={setValue} />
       </div>
       <div className="pane pane-right">
-        <DataViewer value={value} />
+        <DataViewer value={value} isDarkMode={isDarkMode} />
       </div>
     </div>
   );
