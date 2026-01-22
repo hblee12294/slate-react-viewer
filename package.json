@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@uiw/react-json-view": "2.0.0-alpha.41",
     "classnames": "^2.5.1",
     "is-hotkey": "^0.2.0",
     "react": "^19.2.0",
