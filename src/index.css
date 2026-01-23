@@ -116,6 +116,10 @@ pre {
   flex-grow: 1;
 }
 
+[contenteditable]:focus {
+  outline: none;
+}
+
 .data-viewer {
   padding: 2rem;
   font-size: 0.875rem;
