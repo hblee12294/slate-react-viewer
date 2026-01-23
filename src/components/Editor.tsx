@@ -38,15 +38,40 @@ const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
 interface RichTextEditorProps {
   value: Descendant[];
   onChange: (value: Descendant[]) => void;
+  onSelectionChange?: (selection: Descendant[]) => void;
 }
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({
+  value,
+  onChange,
+  onSelectionChange,
+}) => {
   const renderElement = useCallback((props: any) => <Element {...props} />, []);
   const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   return (
-    <Slate editor={editor} initialValue={value} onChange={onChange}>
+    <Slate
+      editor={editor}
+      initialValue={value}
+      onChange={(newValue) => {
+        onChange(newValue);
+        if (onSelectionChange) {
+          const { selection } = editor;
+          if (selection) {
+            try {
+              const fragment = Editor.fragment(editor, selection);
+              onSelectionChange(fragment);
+            } catch (error) {
+              console.warn("Failed to get fragment from selection:", error);
+              onSelectionChange([]);
+            }
+          } else {
+            onSelectionChange([]);
+          }
+        }
+      }}
+    >
       <div className="toolbar">
         <MarkButton format="bold" icon={<MdFormatBold />} />
         <MarkButton format="italic" icon={<MdFormatItalic />} />

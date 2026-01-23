@@ -31,6 +31,7 @@ const INITIAL_VALUE: Descendant[] = [
 
 function App() {
   const [value, setValue] = useState<Descendant[]>(INITIAL_VALUE);
+  const [selectionValue, setSelectionValue] = useState<Descendant[]>([]);
   const [isDarkMode, setIsDarkMode] = useState(() => {
     // Check localStorage first
     const stored = localStorage.getItem("theme");
@@ -64,10 +65,18 @@ function App() {
       </button>
 
       <div className="pane pane-left">
-        <Editor value={value} onChange={setValue} />
+        <Editor
+          value={value}
+          onChange={setValue}
+          onSelectionChange={setSelectionValue}
+        />
       </div>
       <div className="pane pane-right">
-        <DataViewer value={value} isDarkMode={isDarkMode} />
+        <DataViewer
+          value={value}
+          selection={selectionValue}
+          isDarkMode={isDarkMode}
+        />
       </div>
     </div>
   );
