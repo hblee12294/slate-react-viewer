@@ -6,6 +6,7 @@ import {
   Transforms,
   createEditor,
   Element as SlateElement,
+  Range,
 } from "slate";
 import type { Descendant } from "slate";
 import { withHistory } from "slate-history";
@@ -58,7 +59,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
         onChange(newValue);
         if (onSelectionChange) {
           const { selection } = editor;
-          if (selection) {
+          if (selection && !Range.isCollapsed(selection)) {
             try {
               const fragment = Editor.fragment(editor, selection);
               onSelectionChange(fragment);
