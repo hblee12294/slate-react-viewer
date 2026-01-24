@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
+import type { RenderElementProps, RenderLeafProps } from "slate-react";
 import {
   Editor,
   Transforms,
@@ -47,8 +48,14 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   onChange,
   onSelectionChange,
 }) => {
-  const renderElement = useCallback((props: any) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const renderElement = useCallback(
+    (props: RenderElementProps) => <Element {...props} />,
+    [],
+  );
+  const renderLeaf = useCallback(
+    (props: RenderLeafProps) => <Leaf {...props} />,
+    [],
+  );
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   return (
@@ -111,7 +118,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
           autoFocus
           onKeyDown={(event) => {
             for (const hotkey in HOTKEYS) {
-              if (isHotkey(hotkey, event as any)) {
+              if (isHotkey(hotkey, event as unknown as KeyboardEvent)) {
                 event.preventDefault();
                 const mark = HOTKEYS[hotkey];
                 toggleMark(editor, mark);
@@ -147,13 +154,20 @@ const toggleBlock = (editor: Editor, format: string) => {
     };
   } else {
     newProperties = {
-      type: (isActive ? "paragraph" : isList ? "list-item" : format) as any,
+      type: (isActive
+        ? "paragraph"
+        : isList
+          ? "list-item"
+          : format) as SlateElement["type"],
     };
   }
   Transforms.setNodes<SlateElement>(editor, newProperties);
 
   if (!isActive && isList) {
-    const block = { type: format, children: [] } as any;
+    const block: SlateElement = {
+      type: format as SlateElement["type"],
+      children: [],
+    };
     Transforms.wrapNodes(editor, block);
   }
 };
@@ -178,7 +192,7 @@ const isBlockActive = (editor: Editor, format: string, blockType = "type") => {
       match: (n) =>
         !Editor.isEditor(n) &&
         SlateElement.isElement(n) &&
-        (n as any)[blockType] === format,
+        (n as unknown as Record<string, unknown>)[blockType] === format,
     }),
   );
 
@@ -187,11 +201,15 @@ const isBlockActive = (editor: Editor, format: string, blockType = "type") => {
 
 const isMarkActive = (editor: Editor, format: string) => {
   const marks = Editor.marks(editor);
-  return marks ? (marks as any)[format] === true : false;
+  return marks
+    ? (marks as unknown as Record<string, unknown>)[format] === true
+    : false;
 };
 
-const Element = ({ attributes, children, element }: any) => {
-  const style = { textAlign: element.align };
+const Element = ({ attributes, children, element }: RenderElementProps) => {
+  const style = {
+    textAlign: element.align as React.CSSProperties["textAlign"],
+  };
   switch (element.type) {
     case "block-quote":
       return (
@@ -238,7 +256,7 @@ const Element = ({ attributes, children, element }: any) => {
   }
 };
 
-const Leaf = ({ attributes, children, leaf }: any) => {
+const Leaf = ({ attributes, children, leaf }: RenderLeafProps) => {
   if (leaf.bold) {
     children = <strong>{children}</strong>;
   }
